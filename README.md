@@ -12,4 +12,4 @@ The Diamond dataset is available alongwith the [ggplot2](ggplot2.org/) library o
 
 The analysis of the this data set streches from answering some basic questions, to in-depth study using some complex plots.
 
-For any queries contact,mail at apurvatripathi13@gmial.com . :D
+For any queries, mail at apurvatripathi13@gmial.com . :D
