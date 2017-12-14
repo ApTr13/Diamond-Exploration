@@ -1,0 +1,341 @@
+---
+title: "Diamond Exploration"
+output: html_document
+---
+### Included Libraries and Data Summary
+```{r Libraries & Dataset}
+library(ggplot2)
+library(plyr)
+library(dplyr)
+data(diamonds)
+pf <- read.csv('pseudo_facebook.tsv', sep = '\t')
+```
+
+# Problem Set - Explore One Variables
+
+### 1. Diamonds
+> There are 53940 observations in data set
+
+> It contains 10 variables.
+
+> 3 ordered factors
+
+> Best color of a diamond - 'D'
+
+```{r Diamonds}
+summary(diamonds)
+```
+
+### 2. Price Histogram
+```{r Price Histogram}
+qplot(x= price, data = diamonds)
+```
+
+### 3. Price Histogram Summary
+> The shape of the graph is decreasing logarmithic.
+
+> The Median price is 2401.
+
+> The Mean price is 3933.
+
+```{r}
+summary(diamonds$price)
+```
+
+### 4. Diamond Counts
+> 1729 diamonds cost less than $500.
+
+> 0 diamonds cost less than $500.
+
+> 1656 diamonds cost $15,000 or more.
+
+```{r}
+summary(diamonds$price < 500)
+summary(diamonds$price > 250)
+summary(diamonds$price >= 15000)
+```
+
+
+### 5. Cheaper Diamonds
+```{r Cheaper Diamonds}
+qplot(price, data =diamonds, binwidth = 10)+
+  scale_x_continuous(limits= c(250,1000))
+```
+
+### 6. Price by Cut Histograms
+```{r Price by Cut Histograms}
+qplot(x= price, data = diamonds)+
+  facet_wrap(~cut, ncol = 3)
+```
+
+### 7. Price by Cut
+> 'Premium' cut has the highest priced diamond.
+
+> 'Premium & Ideal' cut has the lowest priced diamond.
+
+> 'Ideal' cut has the lowest median price.
+
+```{r}
+by(diamonds$price, diamonds$cut, summary)
+```
+
+### 8. Scales and Multiple Histograms
+```{r Scales and Multiple Histograms}
+qplot(x = price, data = diamonds) + facet_wrap(~cut, scales="free_y")
+```
+
+
+### 9.Price per Carat by Cut
+```{r Price per Carat by Cut}
+qplot(x = price, y= carat, data = diamonds) +
+  facet_wrap(~cut, scales="free_y")
+```
+
+### 10. Price Box Plots
+```{r Price Box Plots}
+qplot(y=price/carat, x=color,
+      data=na.omit(diamonds), geom = 'boxplot',
+      fill = color)
+
+qplot(y=price/carat, x=cut,
+      data=na.omit(diamonds), geom = 'boxplot',
+      fill = cut)
+
+qplot(y=price/carat, x=clarity,
+      data=na.omit(diamonds), geom = 'boxplot',
+      fill = clarity)
+```
+
+### 11. Interquartile Range - IQR
+> Price Range for middle 50% for color 'D' is *911* to *4214*.
+
+> Price Range for middle 50% for color 'J' is *1860* to *7695*.
+
+> IQR for best color is *3302.5*
+
+> IQR for best color is *5834.5*
+```{r Interquartile Range - IQR}
+by(diamonds$price,diamonds$color,summary)
+by(diamonds$price,diamonds$color,IQR)
+```
+
+
+### 12. Price per Carat Box Plots by Color
+```{r Price per Carat Box Plots by Color}
+qplot(y=price/carat, x=color,
+      data=na.omit(diamonds), geom = 'boxplot',
+      fill = color)
+```
+
+### 13. Carat Frequency Polygon
+> Carat sizes having a count greater than 2000 are *0.3* & *1.01*
+
+```{r Carat Frequency Polygon}
+qplot(x=carat,data=na.omit(diamonds),
+      geom = 'freqpoly',binwidth = 0.1,yaxs="i") + 
+  scale_y_continuous(expand = c(0, 0),
+                     breaks = seq(0,11000,1000),limits = c(0, 11000)) + 
+  scale_x_continuous(expand = c(0, 0),
+                     breaks = seq(0,5,0.1), limits = c(0, 5))
+```
+
+
+# Problem Set - Explore Two Variables
+
+### 1. Price vs x
+```{r Price vs x}
+ggplot(aes(x,price), data = diamonds) + 
+  geom_point()
+```
+
+### 2. Findings - price vs x
+> Price rises exponentially for x b/w 6 to 9***
+
+### 3. Correlations
+```{r Correlations}
+cor.test(diamonds$x,diamonds$price)
+cor.test(diamonds$y,diamonds$price)
+cor.test(diamonds$z,diamonds$price)
+```
+
+### 4. price vs depth
+```{r price vs depth}
+ggplot(aes(depth,price), data = diamonds) + 
+  geom_point()
+```
+
+### 5. Adjustments- price vs depth
+```{r Adjustments- price vs depth}
+summary(diamonds$depth)
+
+ggplot(aes(depth,price), data = diamonds) + 
+  geom_point(alpha = 1/100, position = position_jitter(h=0))+
+  scale_x_continuous(breaks = seq(43,79,2))
+```
+
+### 6. Typical Depth range
+> 59 to 63
+
+### 7. Correlation- price vs depth
+```{r Correlation- price vs depth}
+cor.test(diamonds$depth,diamonds$price)
+```
+
+### 8. price vs carat
+```{r price vs carat}
+ggplot(aes(carat,price), data = diamonds)+
+  geom_point()+
+  xlim(0, quantile(diamonds$carat, 0.99))+
+  ylim(0, quantile(diamonds$price, 0.99))
+```
+
+### 9. price vs volume
+```{r price vs volume}
+diamonds$volume <- diamonds$x*diamonds$y*diamonds$z
+summary(diamonds$volume)
+ggplot(aes(volume,price), data = diamonds)+
+  geom_point()+
+  xlim(0,450)
+```
+
+### 10. Findings- price vs volume
+> Both vary somewhat linerly
+
+```{r Findings- price vs volume}
+#count(diamonds$volume == 0)
+```
+
+### 11. Coorelations on subsets
+```{r Coorelations on subsets}
+with(subset(diamonds, volume>0 & volume<=800), cor.test(volume, price))
+```
+
+### 12. Adjustments - price vs volume
+```{r Adjustments - price vs volume}
+ggplot(aes(volume,price),data = subset(diamonds, volume>0 & volume<=800))+
+  geom_point(alpha = 1/50, position = position_jitter(h=0))+
+  geom_smooth(method = 'lm', color = 'red')+
+  xlim(0,450)
+```
+
+### 13. Mean Price by clarity
+```{r Mean Price by clarity}
+clarityGroups <- group_by(diamonds, clarity)
+diamondsByClarity <- summarize(
+  clarityGroups,
+  mean_price = mean(price),
+  median_price = median(price),
+  min_price = min(price),
+  max_price = max(price),
+  n = n())
+
+head(diamondsByClarity)
+```
+
+### 14. Bar charts of mean price
+```{r}
+diamonds_by_clarity <- group_by(diamonds, clarity)
+diamonds_mp_by_clarity <- summarise(diamonds_by_clarity, mean_price = mean(price))
+
+diamonds_by_color <- group_by(diamonds, color)
+diamonds_mp_by_color <- summarise(diamonds_by_color, mean_price = mean(price))
+
+library(gridExtra)
+
+p1 <-ggplot(aes(clarity, mean_price), data=diamonds_mp_by_clarity)+
+  geom_bar(stat = 'identity')
+
+p2 <-ggplot(aes(color, mean_price), data=diamonds_mp_by_color)+
+  geom_bar(stat = 'identity')
+
+grid.arrange(p1, p2)
+
+```
+
+
+### 15. Trends in mean price
+> SI2 has max of mean_price in Clarity.
+
+> Mean_price increases form D to J in color.
+
+
+# Problem Set - Explore Many Variables
+
+### 1. Price Histograms with Facet and color
+```{r Price Histograms with Facet and color}
+qplot(data = diamonds, x= log(price), fill=cut) +
+  facet_wrap(~color, ncol = 3) +
+  ylim(0,600) +
+  scale_fill_brewer(type = 'qual')
+```
+
+### 2. Price vs Table colored by cut
+```{r Price vs Table colored by cut}
+ggplot(aes(table,price),data = diamonds) +
+  geom_point(aes(colour=cut))+
+  scale_x_continuous(limits = c(50, 80), breaks = seq(50,80,2))+
+  scale_fill_brewer(type = 'qual')
+```
+
+### 3. Typical Table Value
+> Typical range for Ideal cut is 53 to 57.
+
+> Typical range for Premium cut is 58 to 62.
+
+### 4. Price vs. Volume and Diamond Clarity
+```{r Price vs. Volume and Diamond Clarity}
+ggplot(aes(volume, price), data = diamonds) +
+  geom_point(aes(colour=clarity))+
+  scale_fill_brewer(type = 'div')+
+  scale_y_log10()+
+  xlim(0, quantile(diamonds$volume, 0.99))
+```
+
+### 5. Proportion of Friendships Initiated
+```{r Proportion of Friendships Initiated}
+pf$prop_initiated <-pf$friendships_initiated/pf$friend_count
+```
+
+### 6. prop_initiated vs. tenure
+```{r prop_initiated vs. tenure} 
+pf$year_joined <- floor((2014 - pf$tenure/365))
+pf$year_joined.bucket <- cut(
+  pf$year_joined, breaks = c(2004,2009,2011,2012,2014))
+
+table(pf$year_joined.bucket)
+ggplot(aes(tenure, prop_initiated),
+       data =subset(pf,!is.na(prop_initiated),!is.na(prop_initiated)))+
+  geom_line(aes(colour= year_joined.bucket), stat = 'summary', fun.y = median)
+```
+
+### 7. Smoothing prop_initiated vs. tenure
+```{r Smoothing prop_initiated vs. tenure}
+ggplot(aes(tenure, prop_initiated),
+       data =subset(pf,!is.na(prop_initiated),!is.na(prop_initiated)))+
+  geom_smooth(aes(colour= year_joined.bucket))
+
+```
+
+### 8. Greatest prop_initiated Group
+> People who joined after 2012, initiated the greatest proportion of its freindships.
+
+### 9. Largest Group Mean prop_initiated
+> Mean of Largest Group = 0.6654
+
+> The reason behind the enormous increase in friendships initiated after 2012, is the rapid growing popularity of facebook among the younger age groups, who spend a lot of time on suck social networking sites. 
+
+```{r}
+by(pf$prop_initiated, pf$year_joined.bucket, summary)
+```
+
+### 10. Price/Carat Binned, Faceted, & Colored
+```{r Price/Carat Binned, Faceted, & Colored}
+ggplot(aes(cut,price/carat), data= diamonds)+
+  geom_jitter(aes(colour=color))+
+  facet_wrap(~clarity, ncol = 3)+
+  scale_color_brewer(type = 'div')+
+  theme(axis.text=element_text(size=6),
+        axis.title=element_text(size=14,face="bold"))
+```
+
+
